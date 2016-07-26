@@ -10,8 +10,9 @@ import groovy.json.JsonOutput
 
 class Api {
 
-    def thing 
+    /* ----------------------------- App Stuff ----------------------------- */
 
+    // Deploy an app according to the specified properties of the application 
     def deployApp(properties) {
         def http = new HTTPBuilder( 'http://localhost' )
 
@@ -44,24 +45,18 @@ class Api {
                 send JSON, postBody
 
                 response.success = { res ->
-                println "POST response status: ${res.statusLine}"
-                println("Success: $res.success")
-                println("Status:  $res.status")
-                println("Reason:  $res.statusLine.reasonPhrase")
-                println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+                printSuccess('POST', res)
                 assert res.statusLine.statusCode == 201
                 }
             }
         }
         catch (HttpResponseException e){
-            def r = e.response
-            println("Success: $r.success")
-            println("Status:  $r.status")
-            println("Reason:  $r.statusLine.reasonPhrase")
-            println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(r.data))}")
+            def res = e.response
+            printFailure('POST', res)
         }
     }
 
+    // Restart an app by the appId
     def restartApp(appId) {
         def http = new HTTPBuilder( 'http://localhost' )
 
@@ -72,24 +67,18 @@ class Api {
                 send JSON, []
 
                 response.success = { res ->
-                println "POST response status: ${res.statusLine}"
-                println("Success: $res.success")
-                println("Status:  $res.status")
-                println("Reason:  $res.statusLine.reasonPhrase")
-                println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+                printSuccess('POST', res)
                 assert res.statusLine.statusCode == 200
                 }
             }
         }
         catch (HttpResponseException e){
-            def r = e.response
-            println("Success: $r.success")
-            println("Status:  $r.status")
-            println("Reason:  $r.statusLine.reasonPhrase")
-            println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(r.data))}")
+            def res = e.response
+            printFailure('POST', res)
         }  
     }
 
+    // Destroy all instances of an app by appId
     def destroyApp(appId) {
         def http = new HTTPBuilder( 'http://localhost' )
 
@@ -99,22 +88,77 @@ class Api {
                 headers.Accept = 'application/json'
 
                 response.success = { res ->
-                println "POST response status: ${res.statusLine}"
-                println("Success: $res.success")
-                println("Status:  $res.status")
-                println("Reason:  $res.statusLine.reasonPhrase")
-                println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+                printSuccess('DELETE', res)
                 assert res.statusLine.statusCode == 200
                 }
             }
         }
         catch (HttpResponseException e){
-            def r = e.response
-            println("Success: $r.success")
-            println("Status:  $r.status")
-            println("Reason:  $r.statusLine.reasonPhrase")
-            println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(r.data))}")
+            def res = e.response
+            printFailure('DELETE', res)
         }  
+    }
+
+    // Scale an app with appId to numInstances
+    def scaleApp(appId, numInstances) {
+        def http = new HTTPBuilder( 'http://localhost' )
+
+        def postBody = [
+            cmd: 'sleep 55',
+            instances: numInstances
+        ]
+
+        try {
+            http.request( PUT, JSON ) { req ->
+                uri.path = '/marathon/v2/apps/' + appId
+                headers.Accept = 'application/json'
+                send JSON, postBody
+
+                response.success = { res ->
+                printSuccess('PUT', res)
+                assert res.statusLine.statusCode == 200
+                }
+            }
+        }
+        catch (HttpResponseException e){
+            def res = e.response
+            printFailure('PUT', res)
+        }  
+    }
+
+    /* ---------------------------- Group Stuff ---------------------------- */
+
+    def deployGroup() {
+
+    }
+
+    def scaleGroup() {
+
+    }
+
+    def updateGroup() {
+
+    }
+
+    def removeGroup() {
+
+    }
+
+    /* ---------------------------- Output Stuff --------------------------- */
+    def printSuccess(method, res) {
+        println("$method response status: ${res.statusLine}")
+        println("Success: $res.success")
+        println("Status:  $res.status")
+        println("Reason:  $res.statusLine.reasonPhrase")
+        println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+    }
+
+    def printFailure(method, res) {
+        println("$method failure")
+        println("Success: $res.success")
+        println("Status:  $res.status")
+        println("Reason:  $res.statusLine.reasonPhrase")
+        println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
     }
 
     // deployLB

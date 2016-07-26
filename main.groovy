@@ -25,7 +25,13 @@ def properties = [
 ]
 
 // Deploy Mongo app set in properties above
-//app.deployApp(properties)
+app.deployApp(properties)
+
+// Wait to restart to Marathon doesn't get mad
+sleep(1000)
 
 // Restart Mongo app
-app.restartApp('mongoal')
+app.restartApp('mongooble')
+
+// Delete Mongo app
+app.destroyApp('mongooble')

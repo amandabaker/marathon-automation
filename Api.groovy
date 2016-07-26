@@ -128,21 +128,10 @@ class Api {
 
     /* ---------------------------- Group Stuff ---------------------------- */
 
-    def deployGroup() {
-
-    }
-
-    def scaleGroup() {
-
-    }
-
-    def updateGroup() {
-
-    }
-
-    def removeGroup() {
-
-    }
+    def deployGroup () {}
+    def scaleGroup  () {}
+    def updateGroup () {}
+    def removeGroup () {}
 
     /* ---------------------------- Output Stuff --------------------------- */
     def printSuccess(method, res) {

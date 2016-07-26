@@ -12,26 +12,57 @@ import groovy.json.JsonOutput
 app = new Api()
 
 // Mongo app for testing
-def properties = [
+def appProperties = [
     appId: 'mongooble',
     appCpus: 0.1,
-    appMem: 256,
+    appMem: 128,
     appInstances: 1,
     appImage: 'mongo',
     appContainerPort: 0,
     appHostPort: 0,
     appServicePort: 0,
-    appHaproxyGroup: 'internal',
+    appHaproxyGroup: 'internal'
+]
+
+def groupProperties = [
+        [
+            appId: 'mongooble',
+            appCpus: 0.1,
+            appMem: 256,
+            appInstances: 1,
+            appImage: 'mongo',
+            appContainerPort: 0,
+            appHostPort: 0,
+            appServicePort: 0,
+            appHaproxyGroup: 'internal'
+        ],
+        [
+            appId: 'mongoblet',
+            appCpus: 0.1,
+            appMem: 256,
+            appInstances: 1,
+            appImage: 'mongo',
+            appContainerPort: 0,
+            appHostPort: 0,
+            appServicePort: 0,
+            appHaproxyGroup: 'internal',
+        ]
 ]
 
 // Deploy Mongo app set in properties above
-app.deployApp(properties)
+app.deployApp(appProperties)
 
 // Wait to restart to Marathon doesn't get mad
 sleep(1000)
 
 // Restart Mongo app
 app.restartApp('mongooble')
+
+sleep(5000)
+
+app.scaleApp('mongooble', 5)
+
+sleep(5000)
 
 // Delete Mongo app
 app.destroyApp('mongooble')

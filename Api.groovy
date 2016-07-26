@@ -23,14 +23,14 @@ class Api {
             container: [
                 type: 'DOCKER',
                 docker: [
-                image: properties.appImage,
-                network: 'BRIDGE',
-                portMappings: [[
-                    containerPort: properties.appContainerPort,
-                    hostPort: properties.appHostPort,
-                    servicePort: properties.appServicePort,
-                    protocol: 'tcp'
-                ]]
+                    image: properties.appImage,
+                    network: 'BRIDGE',
+                    portMappings: [[
+                        containerPort: properties.appContainerPort,
+                        hostPort: properties.appHostPort,
+                        servicePort: properties.appServicePort,
+                        protocol: 'tcp'
+                    ]]
                 ]
             ],
             labels: [
@@ -38,23 +38,20 @@ class Api {
             ]
         ]
         try {
-        http.request( POST, JSON ) { req ->
-            uri.path = '/marathon/v2/apps'
-            headers.Accept = 'application/json'
-            // headers.Accept-Encoding = 'gzip, deflate'
-            // headers.Content-Length = 562
-            // headers.Content-Type = 'application/json; charset=utf-8'
-            send JSON, postBody
+            http.request( POST, JSON ) { req ->
+                uri.path = '/marathon/v2/apps'
+                headers.Accept = 'application/json'
+                send JSON, postBody
 
-            response.success = { res ->
-            println "POST response status: ${res.statusLine}"
-            println("Success: $res.success")
-            println("Status:  $res.status")
-            println("Reason:  $res.statusLine.reasonPhrase")
-            println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
-            assert res.statusLine.statusCode == 201
+                response.success = { res ->
+                println "POST response status: ${res.statusLine}"
+                println("Success: $res.success")
+                println("Status:  $res.status")
+                println("Reason:  $res.statusLine.reasonPhrase")
+                println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+                assert res.statusLine.statusCode == 201
+                }
             }
-        }
         }
         catch (HttpResponseException e){
             def r = e.response
@@ -63,6 +60,34 @@ class Api {
             println("Reason:  $r.statusLine.reasonPhrase")
             println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(r.data))}")
         }
+    }
+
+    def restartApp(appName) {
+        def http = new HTTPBuilder( 'http://localhost' )
+
+        try {
+            http.request( POST, JSON ) { req ->
+                uri.path = '/marathon/v2/apps/' + appName + '/restart'
+                headers.Accept = 'application/json'
+                send JSON, []
+
+                response.success = { res ->
+                println "POST response status: ${res.statusLine}"
+                println("Success: $res.success")
+                println("Status:  $res.status")
+                println("Reason:  $res.statusLine.reasonPhrase")
+                println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+                assert res.statusLine.statusCode == 200
+                }
+            }
+        }
+        catch (HttpResponseException e){
+            def r = e.response
+            println("Success: $r.success")
+            println("Status:  $r.status")
+            println("Reason:  $r.statusLine.reasonPhrase")
+            println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(r.data))}")
+        }  
     }
 
     // deployLB

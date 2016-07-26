@@ -3,7 +3,7 @@ package myPackage
 @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1' )
 
 import groovyx.net.http.*
-import static groovyx.net.http.Method.POST
+import static groovyx.net.http.Method.*
 import static groovyx.net.http.ContentType.TEXT
 import static groovyx.net.http.ContentType.JSON
 import groovy.json.JsonOutput
@@ -62,14 +62,41 @@ class Api {
         }
     }
 
-    def restartApp(appName) {
+    def restartApp(appId) {
         def http = new HTTPBuilder( 'http://localhost' )
 
         try {
             http.request( POST, JSON ) { req ->
-                uri.path = '/marathon/v2/apps/' + appName + '/restart'
+                uri.path = '/marathon/v2/apps/' + appId + '/restart'
                 headers.Accept = 'application/json'
                 send JSON, []
+
+                response.success = { res ->
+                println "POST response status: ${res.statusLine}"
+                println("Success: $res.success")
+                println("Status:  $res.status")
+                println("Reason:  $res.statusLine.reasonPhrase")
+                println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+                assert res.statusLine.statusCode == 200
+                }
+            }
+        }
+        catch (HttpResponseException e){
+            def r = e.response
+            println("Success: $r.success")
+            println("Status:  $r.status")
+            println("Reason:  $r.statusLine.reasonPhrase")
+            println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(r.data))}")
+        }  
+    }
+
+    def destroyApp(appId) {
+        def http = new HTTPBuilder( 'http://localhost' )
+
+        try {
+            http.request( DELETE ) {
+                uri.path = '/marathon/v2/apps/' + appId
+                headers.Accept = 'application/json'
 
                 response.success = { res ->
                 println "POST response status: ${res.statusLine}"

@@ -14,32 +14,18 @@ class Api {
 
     /* ----------------------------- App Stuff ----------------------------- */
 
-    // Deploy an app according to the specified properties of the application 
-    def deployApp(properties) {
-        def http = new HTTPBuilder( baseUrl )
+    // Deploy an app according to the specified properties 'p' of the application 
+    def deployApp(p) {
 
-        def postBody = [
-            id: properties.appId,
-            cpus: properties.appCpus,
-            mem: properties.appMem,
-            instances: properties.appInstances, 
-            container: [
-                type: 'DOCKER',
-                docker: [
-                    image: properties.appImage,
-                    network: 'BRIDGE',
-                    portMappings: [[
-                        containerPort: properties.appContainerPort,
-                        hostPort: properties.appHostPort,
-                        servicePort: properties.appServicePort,
-                        protocol: 'tcp'
-                    ]]
-                ]
-            ],
-            labels: [
-                HAPROXY_GROUP: properties.appHaproxyGroup
-            ]
-        ]
+        //  It might be useful to check the properties 'p' passed in to ensure that
+        //    the data is valid. Maybe warn if p does not contain:
+        //    cpu, mem, container.docker.image, constraints
+
+        // checkPropertiesForDeploy(p)
+
+        def http = new HTTPBuilder( baseUrl )
+        def postBody = deployAppBodyBuilder (p)
+        println(postBody)
         try {
             http.request( POST, JSON ) { req ->
                 uri.path = '/marathon/v2/apps'
@@ -56,6 +42,66 @@ class Api {
             def res = e.response
             printFailure('POST', res)
         }
+    }
+    def deployAppBodyBuilder(p) {
+        def postBody = [
+            id: p.appId,
+            cpus: p.appCpus ?: 1,
+            mem: p.appMem ?: 512,
+            requireports: p.requirePorts ?: false,
+            instances: p.appInstances ?: 1, 
+            executor: p.appExecutor ?: '',
+            container: [
+                type: 'DOCKER',
+                docker: [
+                    image: p.appImage,
+                    network: 'BRIDGE',
+                    portMappings: [[ // what if multiple port mappings?
+                        containerPort: p.appContainerPort ?: 0,
+                        hostPort: p.appHostPort ?: 0,
+                        servicePort: p.appServicePort ?: 0,
+                        protocol: 'tcp'
+                    ]],
+                    privileged: p.appIsPrivileged ?: false,
+                    parameters: [], // can have multiple parameters
+                    forcePullImage: p.appForcePullImage ?: false
+                ],
+                volumes: [] // can have Multiple volumes
+            ],
+            constraints: [],  // can have multiple, must be certain values
+            labels: [
+                // Place in the internal group by default. Might change.
+                HAPROXY_GROUP: p.appHaproxyGroup ?: 'internal'
+            ],
+            fetch: [], // can have multiple uri/executable/extract/cache for each
+            dependencies: [], // can have multiple
+            healthChecks: [] // can have multiple
+                //backoffSeconds (these are a part of health checks)
+                //backoffFactor
+                //maxLaunchDelaySeconds
+                //upgradeStrategy
+        ]
+
+        if (p?.appCmd){
+            postBody.put('cmd', p.appCmd)
+        }   // Can have cmd OR args, but not both
+        else if (p?.appArgs){
+            // This is just an array of arguments
+            postBody.put('args', p.appArgs)
+        }
+        if (p?.appEnv){
+
+            // TODO these are key value pairs so copy format of labels (not many examples of env)
+            // def envs = []
+            // for (env in p.appEnv) {
+            //     envs.add(env)
+            // }
+            // postBody.put('env', envs)
+        }
+        if (p?.appAcceptedResourceRoles){
+
+        }
+        return postBody
     }
 
     // Restart an app by the appId

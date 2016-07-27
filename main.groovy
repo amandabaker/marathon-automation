@@ -1,52 +1,47 @@
 
 package myPackage
 
-// println 'hello world'
-@Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1' )
-import groovyx.net.http.*
-import static groovyx.net.http.Method.POST
-import static groovyx.net.http.ContentType.TEXT
-import static groovyx.net.http.ContentType.JSON
-import groovy.json.JsonOutput
-
 app = new Api()
+app.baseUrl = 'http://localhost'
 
 // Mongo app for testing
 def appProperties = [
-    appId: 'mongooble',
+    appId: 'mongoats',
     appCpus: 0.1,
     appMem: 128,
     appInstances: 1,
     appImage: 'mongo',
-    appContainerPort: 0,
+    appContainerPort: 27017,
     appHostPort: 0,
     appServicePort: 0,
     appHaproxyGroup: 'internal'
 ]
 
+// Test scaling by scaling up to <scaleUp> instances
+def scaleUp = 5 
 def groupProperties = [
-        [
-            appId: 'mongooble',
-            appCpus: 0.1,
-            appMem: 256,
-            appInstances: 1,
-            appImage: 'mongo',
-            appContainerPort: 0,
-            appHostPort: 0,
-            appServicePort: 0,
-            appHaproxyGroup: 'internal'
-        ],
-        [
-            appId: 'mongoblet',
-            appCpus: 0.1,
-            appMem: 256,
-            appInstances: 1,
-            appImage: 'mongo',
-            appContainerPort: 0,
-            appHostPort: 0,
-            appServicePort: 0,
-            appHaproxyGroup: 'internal',
-        ]
+    [
+        appId: 'mongooble',
+        appCpus: 0.1,
+        appMem: 256,
+        appInstances: 1,
+        appImage: 'mongo',
+        appContainerPort: 0,
+        appHostPort: 0,
+        appServicePort: 0,
+        appHaproxyGroup: 'internal'
+    ],
+    [
+        appId: 'mongoblet',
+        appCpus: 0.1,
+        appMem: 256,
+        appInstances: 1,
+        appImage: 'mongo',
+        appContainerPort: 0,
+        appHostPort: 0,
+        appServicePort: 0,
+        appHaproxyGroup: 'internal',
+    ]
 ]
 
 // Deploy Mongo app set in properties above
@@ -56,13 +51,13 @@ app.deployApp(appProperties)
 sleep(1000)
 
 // Restart Mongo app
-app.restartApp('mongooble')
+app.restartApp(appProperties.appId)
 
 sleep(5000)
 
-app.scaleApp('mongooble', 5)
+app.scaleApp(appProperties.appId, scaleUp)
 
 sleep(5000)
 
 // Delete Mongo app
-app.destroyApp('mongooble')
+app.destroyApp(appProperties.appId)

@@ -10,11 +10,13 @@ import groovy.json.JsonOutput
 
 class Api {
 
+    def baseUrl
+
     /* ----------------------------- App Stuff ----------------------------- */
 
     // Deploy an app according to the specified properties of the application 
     def deployApp(properties) {
-        def http = new HTTPBuilder( 'http://localhost' )
+        def http = new HTTPBuilder( baseUrl )
 
         def postBody = [
             id: properties.appId,
@@ -58,7 +60,7 @@ class Api {
 
     // Restart an app by the appId
     def restartApp(appId) {
-        def http = new HTTPBuilder( 'http://localhost' )
+        def http = new HTTPBuilder( baseUrl )
 
         try {
             http.request( POST, JSON ) { req ->
@@ -80,7 +82,7 @@ class Api {
 
     // Destroy all instances of an app by appId
     def destroyApp(appId) {
-        def http = new HTTPBuilder( 'http://localhost' )
+        def http = new HTTPBuilder( baseUrl )
 
         try {
             http.request( DELETE ) {
@@ -101,7 +103,7 @@ class Api {
 
     // Scale an app with appId to numInstances
     def scaleApp(appId, numInstances) {
-        def http = new HTTPBuilder( 'http://localhost' )
+        def http = new HTTPBuilder( baseUrl )
 
         def postBody = [
             cmd: 'sleep 55',

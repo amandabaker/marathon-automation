@@ -21,8 +21,6 @@ class Api {
         //    the data is valid. Maybe warn if p does not contain:
         //    cpu, mem, container.docker.image, constraints
 
-        // checkPropertiesForDeploy(p)
-
         def http = new HTTPBuilder (baseUrl)
         def postBody = deployAppBodyBuilder (p)
         println (postBody)
@@ -96,9 +94,16 @@ class Api {
         if (p?.appAcceptedResourceRoles) {
             postBody.put ('acceptedResourceRoles', p.appAcceptedResourceRoles)
         }
-        if (p?.appVolumes) {
 
-        }
+        // TODO: anything with multiple things or verification needed
+        if (p?.appPortMappings) {}
+        if (p?.appParameters) {}
+        if (p?.appVolumes) {}
+        if (p?.appConstraints) {}
+        if (p?.appLabels) {}
+        if (p?.appFetch) {}
+        if (p?.appDependencies) {}
+        if (p?.appHealthChecks) {}
         return postBody
     }
 

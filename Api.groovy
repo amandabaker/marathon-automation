@@ -23,27 +23,27 @@ class Api {
 
         // checkPropertiesForDeploy(p)
 
-        def http = new HTTPBuilder( baseUrl )
+        def http = new HTTPBuilder (baseUrl)
         def postBody = deployAppBodyBuilder (p)
-        println(postBody)
+        println (postBody)
         try {
-            http.request( POST, JSON ) { req ->
+            http.request (POST, JSON) { req ->
                 uri.path = '/marathon/v2/apps'
                 headers.Accept = 'application/json'
                 send JSON, postBody
 
                 response.success = { res ->
-                printSuccess('POST', res)
+                printSuccess ('POST', res)
                 assert res.statusLine.statusCode == 201
                 }
             }
         }
-        catch (HttpResponseException e){
+        catch (HttpResponseException e) {
             def res = e.response
-            printFailure('POST', res)
+            printFailure ('POST', res)
         }
     }
-    def deployAppBodyBuilder(p) {
+    def deployAppBodyBuilder (p) {
         def postBody = [
             id: p.appId,
             cpus: p.appCpus ?: 1,
@@ -82,74 +82,72 @@ class Api {
                 //upgradeStrategy
         ]
 
-        if (p?.appCmd){
-            postBody.put('cmd', p.appCmd)
+        if (p?.appCmd) {
+            postBody.put ('cmd', p.appCmd)
         }   // Can have cmd OR args, but not both
-        else if (p?.appArgs){
+        else if (p?.appArgs) {
             // This is just an array of arguments
-            postBody.put('args', p.appArgs)
+            postBody.put ('args', p.appArgs)
         }
-        if (p?.appEnv){
 
-            // TODO these are key value pairs so copy format of labels (not many examples of env)
-            // def envs = []
-            // for (env in p.appEnv) {
-            //     envs.add(env)
-            // }
-            // postBody.put('env', envs)
+        if (p?.appEnv) {
+            postBody.put ('env', p.appEnv)
         }
-        if (p?.appAcceptedResourceRoles){
+        if (p?.appAcceptedResourceRoles) {
+            postBody.put ('acceptedResourceRoles', p.appAcceptedResourceRoles)
+        }
+        if (p?.appVolumes) {
 
         }
         return postBody
     }
 
     // Restart an app by the appId
-    def restartApp(appId) {
-        def http = new HTTPBuilder( baseUrl )
+    def restartApp (appId) {
+        def http = new HTTPBuilder (baseUrl)
 
         try {
-            http.request( POST, JSON ) { req ->
+            http.request (POST, JSON) { req ->
                 uri.path = '/marathon/v2/apps/' + appId + '/restart'
                 headers.Accept = 'application/json'
                 send JSON, []
 
                 response.success = { res ->
-                printSuccess('POST', res)
+                printSuccess ('POST', res)
                 assert res.statusLine.statusCode == 200
                 }
             }
         }
         catch (HttpResponseException e){
             def res = e.response
-            printFailure('POST', res)
+            printFailure ('POST', res)
         }  
     }
 
     // Destroy all instances of an app by appId
-    def destroyApp(appId) {
-        def http = new HTTPBuilder( baseUrl )
+    def destroyApp (appId) {
+        def http = new HTTPBuilder (baseUrl)
 
         try {
-            http.request( DELETE ) {
+            http.request (DELETE) {
                 uri.path = '/marathon/v2/apps/' + appId
                 headers.Accept = 'application/json'
 
                 response.success = { res ->
-                printSuccess('DELETE', res)
+                printSuccess ('DELETE', res)
                 assert res.statusLine.statusCode == 200
                 }
             }
         }
         catch (HttpResponseException e){
             def res = e.response
-            printFailure('DELETE', res)
+            printFailure ('DELETE', res)
         }  
     }
 
     // Scale an app with appId to numInstances
-    def scaleApp(appId, numInstances) {
-        def http = new HTTPBuilder( baseUrl )
+    def scaleApp (appId, numInstances) {
+        def http = new HTTPBuilder (baseUrl)
 
         def postBody = [
             cmd: 'sleep 55',
@@ -157,14 +155,14 @@ class Api {
         ]
 
         try {
-            http.request( PUT, JSON ) { req ->
+            http.request (PUT, JSON) { req ->
                 uri.path = '/marathon/v2/apps/' + appId
                 headers.Accept = 'application/json'
                 send JSON, postBody
 
                 response.success = { res ->
-                printSuccess('PUT', res)
-                assert res.statusLine.statusCode == 200
+                    printSuccess ('PUT', res)
+                    assert res.statusLine.statusCode == 200
                 }
             }
         }
@@ -182,20 +180,20 @@ class Api {
     def removeGroup () {}
 
     /* ---------------------------- Output Stuff --------------------------- */
-    def printSuccess(method, res) {
-        println("$method response status: ${res.statusLine}")
-        println("Success: $res.success")
-        println("Status:  $res.status")
-        println("Reason:  $res.statusLine.reasonPhrase")
-        println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+    def printSuccess (method, res) {
+        println ("$method response status: ${res.statusLine}")
+        println ("Success: $res.success")
+        println ("Status:  $res.status")
+        println ("Reason:  $res.statusLine.reasonPhrase")
+        println ("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
     }
 
-    def printFailure(method, res) {
-        println("$method failure")
-        println("Success: $res.success")
-        println("Status:  $res.status")
-        println("Reason:  $res.statusLine.reasonPhrase")
-        println("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
+    def printFailure (method, res) {
+        println ("$method failure")
+        println ("Success: $res.success")
+        println ("Status:  $res.status")
+        println ("Reason:  $res.statusLine.reasonPhrase")
+        println ("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
     }
 
     // deployLB

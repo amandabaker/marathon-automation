@@ -14,7 +14,18 @@ def appProperties = [
     appContainerPort: 27017,
     appHostPort: 0,
     appServicePort: 0,
-    appHaproxyGroup: 'internal'
+    appHaproxyGroup: 'internal',
+    appCmd: 'env && sleep 300',
+    appEnv: [
+        LD_LIBRARY_PATH: '/usr/local/lib/myLib',
+        HA_HE_HE_HA: '/usr/lol/no/thx'
+    ],
+    appAcceptResourceRoles: [
+        'role1', '*'
+    ],
+    appLabels: [
+        environment: 'staging'
+    ]
 ]
 
 // Test scaling by scaling up to <scaleUp> instances
@@ -45,19 +56,22 @@ def groupProperties = [
 ]
 
 // Deploy Mongo app set in properties above
-app.deployApp(appProperties)
+//app.deployApp(appProperties)
 
 // Wait to restart to Marathon doesn't get mad
 sleep(1000)
 
 // Restart Mongo app
-app.restartApp(appProperties.appId)
+//app.restartApp(appProperties.appId)
 
-sleep(5000)
+//sleep(5000)
 
-app.scaleApp(appProperties.appId, scaleUp)
+//app.scaleApp(appProperties.appId, scaleUp)
 
-sleep(5000)
+//sleep(5000)
 
 // Delete Mongo app
-app.destroyApp(appProperties.appId)
+//app.destroyApp(appProperties.appId)
+
+app.deployLoadBalancer('external')
+

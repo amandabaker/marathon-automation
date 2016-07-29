@@ -12,10 +12,12 @@ class Api {
 
     def baseUrl
 
+
     /* ----------------------------- App Stuff ----------------------------- */
 
     // Deploy an app according to the specified properties 'p' of the application 
-    def deployApp(p) {
+    def deployApp (p) {
+        // 'p' is a map of the properties of the app
 
         //  It might be useful to check the properties 'p' passed in to ensure that
         //    the data is valid. Maybe warn if p does not contain:
@@ -41,12 +43,15 @@ class Api {
             printFailure ('POST', res)
         }
     }
+
     def deployAppBodyBuilder (p) {
+        // 'p' is a map of the properties of the app
+
         def postBody = [
             id: p.appId,
             cpus: p.appCpus ?: 1,
             mem: p.appMem ?: 512,
-            requireports: p.requirePorts ?: false,
+            requirePorts: p.requirePorts ?: false,
             instances: p.appInstances ?: 1, 
             executor: p.appExecutor ?: '',
             container: [
@@ -109,6 +114,7 @@ class Api {
 
     // Restart an app by the appId
     def restartApp (appId) {
+        // 'appId' is the properties.appId used to create the app
         def http = new HTTPBuilder (baseUrl)
 
         try {
@@ -131,6 +137,8 @@ class Api {
 
     // Destroy all instances of an app by appId
     def destroyApp (appId) {
+        // 'appId' is the properties.appId used to create the app
+
         def http = new HTTPBuilder (baseUrl)
 
         try {
@@ -152,6 +160,9 @@ class Api {
 
     // Scale an app with appId to numInstances
     def scaleApp (appId, numInstances) {
+        // 'appId' is the properties.appId used to create the app
+        // 'numInstances' is the number of instances to which the app will be scaled
+        
         def http = new HTTPBuilder (baseUrl)
 
         def postBody = [
@@ -177,6 +188,65 @@ class Api {
         }  
     }
 
+
+
+    /* ------------------- Marathon Load Balancer Stuff -------------------- */
+
+    // Before automatically creating a load balancer, check to see if one exists
+    def checkHasLoadBalancer (type) {
+        // 'type' is either 'internal' or 'external'
+        // get all applications running
+        // search for load balancer
+        // return whats up
+    }
+
+    // If we need a load balancer, deploy it with a specified type
+    def deployLoadBalancer (type) {
+        // 'type' is either 'internal' or 'external' 
+            //def deployApp (p) {
+        // 'p' is a map of the properties of the app
+
+        //  It might be useful to check the properties 'p' passed in to ensure that
+        //    the data is valid. Maybe warn if p does not contain:
+        //    cpu, mem, container.docker.image, constraints
+
+        def http = new HTTPBuilder (baseUrl)
+        def postBody
+
+        if (type == 'external') {
+            postBody = new File('json/marathon-lb-external.json').text
+
+        }
+        else {
+            postBody = new File('json/marathon-lb-internal.json').text
+        }
+
+        try {
+            http.request (POST, JSON) { req ->
+                uri.path = '/marathon/v2/apps'
+                headers.Accept = 'application/json'
+                send JSON, postBody
+
+                response.success = { res ->
+                printSuccess ('POST', res)
+                assert res.statusLine.statusCode == 201
+                }
+            }
+        }
+        catch (HttpResponseException e) {
+            def res = e.response
+            printFailure ('POST', res)
+        }
+    }
+
+    // Read the configuration for a load balancer from json file
+    def deployLoadBalancerBodyBuilder (p) {
+        def postBody = new File('marathon-lb-external.json').text
+        return postBody
+    }
+
+
+
     /* ---------------------------- Group Stuff ---------------------------- */
 
     def deployGroup () {}
@@ -184,7 +254,10 @@ class Api {
     def updateGroup () {}
     def removeGroup () {}
 
+
+
     /* ---------------------------- Output Stuff --------------------------- */
+
     def printSuccess (method, res) {
         println ("$method response status: ${res.statusLine}")
         println ("Success: $res.success")
@@ -207,6 +280,4 @@ class Api {
     // can you have more than one internal/external load balancer?
 
     // whole life cycle of app pushing to internet
-
-    // add load balancer marathon.json's to README of sample app'
 }

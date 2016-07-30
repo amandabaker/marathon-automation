@@ -1,3 +1,5 @@
 .vscode/*
 *.class
 justInCase/*
+*.sln
+.vs/

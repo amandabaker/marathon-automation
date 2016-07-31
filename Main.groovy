@@ -1,8 +1,7 @@
-
 package myPackage
 
 app = new Api()
-app.baseUrl = 'http://localhost'
+app.init('http://localhost', true)
 
 // Mongo app for testing
 def appProperties = [
@@ -56,22 +55,28 @@ def groupProperties = [
 ]
 
 // Deploy Mongo app set in properties above
-//app.deployApp(appProperties)
+app.deployApp(appProperties)
 
 // Wait to restart to Marathon doesn't get mad
 sleep(1000)
 
 // Restart Mongo app
-//app.restartApp(appProperties.appId)
+app.restartApp(appProperties.appId)
 
-//sleep(5000)
+// Wait for Marathon to do stuff
+sleep(5000)
 
-//app.scaleApp(appProperties.appId, scaleUp)
+// Scale app for show
+app.scaleApp(appProperties.appId, scaleUp)
 
-//sleep(5000)
+// More waiting
+sleep(5000)
 
 // Delete Mongo app
-//app.destroyApp(appProperties.appId)
+app.destroyApp(appProperties.appId)
 
-app.deployLoadBalancer('external')
+// app.deployLoadBalancer('external')
+// app.deployLoadBalancer('internal')
 
+app.checkHasLoadBalancer('external')
+app.checkHasLoadBalancer('internal')

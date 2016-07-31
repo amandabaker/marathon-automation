@@ -11,7 +11,14 @@ import groovy.json.JsonOutput
 class Api {
 
     def baseUrl
+    def http
+    def autoDeployMLB   // MLB == Marathon Load Balancer
 
+    def init (appBaseUrl, appAutoDeployMLB) {
+        baseUrl = appBaseUrl
+        http = new HTTPBuilder (baseUrl)
+        autoDeployMLB = appAutoDeployMLB
+    }
 
     /* ----------------------------- App Stuff ----------------------------- */
 
@@ -22,8 +29,15 @@ class Api {
         //  It might be useful to check the properties 'p' passed in to ensure that
         //    the data is valid. Maybe warn if p does not contain:
         //    cpu, mem, container.docker.image, constraints
+        
+        // If user chooses to deploy marathon LB's automatically
+        if (autoDeployMLB) {
+            // Check if there is already a LB of specified type (external/internal)
+            if (!checkHasLoadBalancer(p.appHaproxyGroup)) {
+                deployLoadBalancer(p.appHaproxyGroup)
+            }
+        }
 
-        def http = new HTTPBuilder (baseUrl)
         def postBody = deployAppBodyBuilder (p)
         println (postBody)
         try {
@@ -115,7 +129,6 @@ class Api {
     // Restart an app by the appId
     def restartApp (appId) {
         // 'appId' is the properties.appId used to create the app
-        def http = new HTTPBuilder (baseUrl)
 
         try {
             http.request (POST, JSON) { req ->
@@ -139,8 +152,6 @@ class Api {
     def destroyApp (appId) {
         // 'appId' is the properties.appId used to create the app
 
-        def http = new HTTPBuilder (baseUrl)
-
         try {
             http.request (DELETE) {
                 uri.path = '/marathon/v2/apps/' + appId
@@ -163,8 +174,6 @@ class Api {
         // 'appId' is the properties.appId used to create the app
         // 'numInstances' is the number of instances to which the app will be scaled
         
-        def http = new HTTPBuilder (baseUrl)
-
         def postBody = [
             cmd: 'sleep 55',
             instances: numInstances
@@ -198,6 +207,29 @@ class Api {
         // get all applications running
         // search for load balancer
         // return whats up
+
+        try {
+            http.request (GET, TEXT) { req ->
+                uri.path = '/marathon/v2/apps/marathon-lb-' + type + '/tasks'
+                println uri.path
+                headers.Accept = 'application/json'
+
+                response.success = { res, reader ->
+                    assert res.statusLine.statusCode == 200
+                    return true
+                }
+            }
+        }
+        catch (HttpResponseException e) {
+            def res = e.response
+            if (res.statusLine.statusCode == 404) {
+                println 'You don\'t have a marathon-lb-<type>'
+            }
+            else {
+                printFailure('GET', res)
+            }
+            return false
+        }
     }
 
     // If we need a load balancer, deploy it with a specified type
@@ -210,7 +242,6 @@ class Api {
         //    the data is valid. Maybe warn if p does not contain:
         //    cpu, mem, container.docker.image, constraints
 
-        def http = new HTTPBuilder (baseUrl)
         def postBody
 
         if (type == 'external') {
@@ -240,10 +271,7 @@ class Api {
     }
 
     // Read the configuration for a load balancer from json file
-    def deployLoadBalancerBodyBuilder (p) {
-        def postBody = new File('marathon-lb-external.json').text
-        return postBody
-    }
+    def deployLoadBalancerBodyBuilder (p) {}
 
 
 

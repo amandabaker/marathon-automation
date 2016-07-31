@@ -11,7 +11,12 @@ import groovy.json.JsonOutput
 class Api {
 
     def baseUrl
+    def http
 
+    def init (appBaseUrl) {
+        baseUrl = appBaseUrl
+        http = new HTTPBuilder (baseUrl)
+    }
 
     /* ----------------------------- App Stuff ----------------------------- */
 
@@ -23,7 +28,6 @@ class Api {
         //    the data is valid. Maybe warn if p does not contain:
         //    cpu, mem, container.docker.image, constraints
 
-        def http = new HTTPBuilder (baseUrl)
         def postBody = deployAppBodyBuilder (p)
         println (postBody)
         try {
@@ -115,7 +119,6 @@ class Api {
     // Restart an app by the appId
     def restartApp (appId) {
         // 'appId' is the properties.appId used to create the app
-        def http = new HTTPBuilder (baseUrl)
 
         try {
             http.request (POST, JSON) { req ->
@@ -139,8 +142,6 @@ class Api {
     def destroyApp (appId) {
         // 'appId' is the properties.appId used to create the app
 
-        def http = new HTTPBuilder (baseUrl)
-
         try {
             http.request (DELETE) {
                 uri.path = '/marathon/v2/apps/' + appId
@@ -163,8 +164,6 @@ class Api {
         // 'appId' is the properties.appId used to create the app
         // 'numInstances' is the number of instances to which the app will be scaled
         
-        def http = new HTTPBuilder (baseUrl)
-
         def postBody = [
             cmd: 'sleep 55',
             instances: numInstances
@@ -210,7 +209,6 @@ class Api {
         //    the data is valid. Maybe warn if p does not contain:
         //    cpu, mem, container.docker.image, constraints
 
-        def http = new HTTPBuilder (baseUrl)
         def postBody
 
         if (type == 'external') {
@@ -240,10 +238,7 @@ class Api {
     }
 
     // Read the configuration for a load balancer from json file
-    def deployLoadBalancerBodyBuilder (p) {
-        def postBody = new File('marathon-lb-external.json').text
-        return postBody
-    }
+    def deployLoadBalancerBodyBuilder (p) {}
 
 
 

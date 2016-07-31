@@ -12,7 +12,7 @@ class Api {
 
     def baseUrl
     def http
-    def autoDeployMLB
+    def autoDeployMLB   // MLB == Marathon Load Balancer
 
     def init (appBaseUrl, appAutoDeployMLB) {
         baseUrl = appBaseUrl

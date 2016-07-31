@@ -23,7 +23,7 @@ def appProperties = [
         'role1', '*'
     ],
     appLabels: [
-        environment: 'staging'
+        HAPROXY_GROUP: 'internal'
     ]
 ]
 

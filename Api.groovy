@@ -84,19 +84,7 @@ class Api {
                     forcePullImage: p.appForcePullImage ?: false
                 ],
                 volumes: [] // can have Multiple volumes
-            ],
-            constraints: [],  // can have multiple, must be certain values
-            labels: [
-                // Place in the internal group by default. Might change.
-                HAPROXY_GROUP: p.appHaproxyGroup ?: 'internal'
-            ],
-            fetch: [], // can have multiple uri/executable/extract/cache for each
-            dependencies: [], // can have multiple
-            healthChecks: [] // can have multiple
-                //backoffSeconds (these are a part of health checks)
-                //backoffFactor
-                //maxLaunchDelaySeconds
-                //upgradeStrategy
+            ]
         ]
 
         if (p?.appCmd) {
@@ -107,22 +95,34 @@ class Api {
             postBody.put ('args', p.appArgs)
         }
 
+        // TODO: many of these would benefit from verification
+        if (p?.appLabels) {
+            postBody.put ('labels', p.appLabels)
+        }
         if (p?.appEnv) {
             postBody.put ('env', p.appEnv)
         }
         if (p?.appAcceptedResourceRoles) {
             postBody.put ('acceptedResourceRoles', p.appAcceptedResourceRoles)
         }
+        if (p?.appConstraints) {
+            postBody.put ('constraints', p.appConstraints)
+        }
+        if (p?.appFetch) {
+            postBody.put ('fetch', p.appFetch)
+        }
+        if (p?.appDependencies) {
+            postBody.put ('dependencies', p.appDependencies)
+        }
+        if (p?.appHealthChecks) {
+            postBody.put ('healthChecks', p.appHealthChecks)
+        }
 
-        // TODO: anything with multiple things or verification needed
+
+        // TODO: these are nested within something else and are being sassy so they can hold up
         if (p?.appPortMappings) {}
         if (p?.appParameters) {}
         if (p?.appVolumes) {}
-        if (p?.appConstraints) {}
-        if (p?.appLabels) {}
-        if (p?.appFetch) {}
-        if (p?.appDependencies) {}
-        if (p?.appHealthChecks) {}
         return postBody
     }
 

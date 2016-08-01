@@ -300,11 +300,4 @@ class Api {
         println ("Reason:  $res.statusLine.reasonPhrase")
         println ("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
     }
-
-    // deployLB
-    //  make sure load balancer happens before anything else
-
-    // can you have more than one internal/external load balancer?
-
-    // whole life cycle of app pushing to internet
 }

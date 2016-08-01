@@ -1,9 +1,6 @@
 package myPackage
 
-app = new Api()
-app.init('http://localhost', true)
-
-// Mongo app for testing
+// mongo app
 def mongoProperties = [
     appId: 'mongo',
     appCpus: 0.1,
@@ -19,6 +16,7 @@ def mongoProperties = [
     ]
 ]
 
+// node-web-app
 def nodeProperties = [
     appId: 'node-web-app',
     appCpus: 0.5,
@@ -49,6 +47,9 @@ def nodeProperties = [
 ]
 
 // Deploy a mongo and a node-web-app container, and loadBalancers if necessary
+
+app = new Api()
+app.init('http://localhost', true)
 //app.deployApp (mongoProperties)
 app.deployApp (nodeProperties)
 

@@ -39,7 +39,6 @@ class Api {
         }
 
         def postBody = deployAppBodyBuilder (p)
-        println (postBody)
         try {
             http.request (POST, JSON) { req ->
                 uri.path = '/marathon/v2/apps'
@@ -211,11 +210,11 @@ class Api {
         try {
             http.request (GET, TEXT) { req ->
                 uri.path = '/marathon/v2/apps/marathon-lb-' + type + '/tasks'
-                println uri.path
                 headers.Accept = 'application/json'
 
                 response.success = { res, reader ->
                     assert res.statusLine.statusCode == 200
+                    println 'Load balancer of type ' + type ' already exists. Not deploying another.'
                     return true
                 }
             }
@@ -223,7 +222,7 @@ class Api {
         catch (HttpResponseException e) {
             def res = e.response
             if (res.statusLine.statusCode == 404) {
-                println 'You don\'t have a marathon-lb-<type>'
+                println 'Load balancer of type ' + type + ' does not exist. Deploying load balancer'
             }
             else {
                 printFailure('GET', res)

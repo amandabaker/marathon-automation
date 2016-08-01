@@ -214,7 +214,7 @@ class Api {
 
                 response.success = { res, reader ->
                     assert res.statusLine.statusCode == 200
-                    println 'Load balancer of type ' + type ' already exists. Not deploying another.'
+                    println 'Load balancer of type ' + type + ' already exists. Not deploying another.'
                     return true
                 }
             }

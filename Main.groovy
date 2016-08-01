@@ -1,4 +1,4 @@
-package myPackage
+package marathonAutomation
 
 app = new Api()
 app.init('http://localhost', true)

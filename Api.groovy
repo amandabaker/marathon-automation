@@ -1,4 +1,4 @@
-package myPackage
+package marathonAutomation
 
 @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1' )
 

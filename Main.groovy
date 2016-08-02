@@ -40,8 +40,7 @@ def appProperties = [
         ]
     ],
     appParameters: [
-        [key: 'a-docker-option', value: 'xxx'],
-        [key: 'b-docker-option', value: 'yyy']
+        [key: 'env', value: '']
     ],
     appVolumes: [
         [

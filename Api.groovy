@@ -116,8 +116,10 @@ class Api {
             postBody.container.docker.put('parameters', p.appParameters)
         }
 
-        // TODO: these are nested within something else and are being sassy so they can hold up
-        if (p?.appVolumes) {}
+        // TODO: Figure out what volumes are about so you can test this before committing to it
+        if (p?.appVolumes) {
+            // postBody.container.put('volumes', p.appVolumes)
+        }
 
         println postBody
 

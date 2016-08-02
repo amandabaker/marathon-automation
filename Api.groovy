@@ -72,12 +72,6 @@ class Api {
                 docker: [
                     image: p.appImage,
                     network: 'BRIDGE',
-                    portMappings: [[ // what if multiple port mappings?
-                        containerPort: p.appContainerPort ?: 0,
-                        hostPort: p.appHostPort ?: 0,
-                        servicePort: p.appServicePort ?: 0,
-                        protocol: 'tcp'
-                    ]],
                     privileged: p.appIsPrivileged ?: false,
                     parameters: [], // can have multiple parameters
                     forcePullImage: p.appForcePullImage ?: false
@@ -116,12 +110,17 @@ class Api {
         if (p?.appHealthChecks) {
             postBody.put ('healthChecks', p.appHealthChecks)
         }
+        if (p?.appPortMappings) {
+            postBody.container.docker.put('portMappings', p.appPortMappings)
+        }
 
 
         // TODO: these are nested within something else and are being sassy so they can hold up
-        if (p?.appPortMappings) {}
         if (p?.appParameters) {}
         if (p?.appVolumes) {}
+
+        println postBody
+
         return postBody
     }
 

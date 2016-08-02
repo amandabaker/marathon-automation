@@ -1,4 +1,4 @@
-package myPackage
+package marathonAutomation
 
 // mongo app
 def mongoProperties = [

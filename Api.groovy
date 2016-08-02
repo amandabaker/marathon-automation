@@ -1,4 +1,4 @@
-package myPackage
+package marathonAutomation
 
 @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7.1' )
 
@@ -72,14 +72,7 @@ class Api {
                 docker: [
                     image: p.appImage,
                     network: 'BRIDGE',
-                    portMappings: [[ // what if multiple port mappings?
-                        containerPort: p.appContainerPort ?: 0,
-                        hostPort: p.appHostPort ?: 0,
-                        servicePort: p.appServicePort ?: 0,
-                        protocol: 'tcp'
-                    ]],
                     privileged: p.appIsPrivileged ?: false,
-                    parameters: [], // can have multiple parameters
                     forcePullImage: p.appForcePullImage ?: false
                 ],
                 volumes: [] // can have Multiple volumes
@@ -116,12 +109,20 @@ class Api {
         if (p?.appHealthChecks) {
             postBody.put ('healthChecks', p.appHealthChecks)
         }
+        if (p?.appPortMappings) {
+            postBody.container.docker.put('portMappings', p.appPortMappings)
+        }
+        if (p?.appParameters) {
+            postBody.container.docker.put('parameters', p.appParameters)
+        }
 
+        // TODO: Figure out what volumes are about so you can test this before committing to it
+        if (p?.appVolumes) {
+            // postBody.container.put('volumes', p.appVolumes)
+        }
 
-        // TODO: these are nested within something else and are being sassy so they can hold up
-        if (p?.appPortMappings) {}
-        if (p?.appParameters) {}
-        if (p?.appVolumes) {}
+        println postBody
+
         return postBody
     }
 
@@ -300,11 +301,4 @@ class Api {
         println ("Reason:  $res.statusLine.reasonPhrase")
         println ("Content: \n${JsonOutput.prettyPrint(JsonOutput.toJson(res.data))}")
     }
-
-    // deployLB
-    //  make sure load balancer happens before anything else
-
-    // can you have more than one internal/external load balancer?
-
-    // whole life cycle of app pushing to internet
 }

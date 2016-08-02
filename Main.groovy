@@ -1,7 +1,7 @@
 package marathonAutomation
 
-app = new Api()
-app.init('http://localhost', true)
+api = new Api()
+api.init('http://localhost', true)
 
 // Mongo app for testing
 def appProperties = [
@@ -24,6 +24,33 @@ def appProperties = [
     ],
     appLabels: [
         HAPROXY_GROUP: 'internal'
+    ],
+    appPortMappings: [
+        [
+            containerPort: 1000,
+            hostPort: 0,
+            servicePort: 0,
+            protocol: 'tcp'
+        ],
+        [
+            containerPort: 27017,
+            hostPort: 0,
+            servicePort: 0,
+            protocol: 'tcp'
+        ]
+    ],
+    appParameters: [
+        [key: 'a-docker-option', value: 'xxx'],
+        [key: 'b-docker-option', value: 'yyy']
+    ],
+    appVolumes: [
+        [
+            containerPath: 'data',
+            mode: 'RW',
+            persistent: [
+                size: 64
+            ]
+        ]
     ]
 ]
 
@@ -55,28 +82,28 @@ def groupProperties = [
 ]
 
 // Deploy Mongo app set in properties above
-app.deployApp(appProperties)
+api.deployApp(appProperties)
 
 // Wait to restart to Marathon doesn't get mad
 sleep(1000)
 
 // Restart Mongo app
-app.restartApp(appProperties.appId)
+api.restartApp(appProperties.appId)
 
 // Wait for Marathon to do stuff
 sleep(5000)
 
 // Scale app for show
-app.scaleApp(appProperties.appId, scaleUp)
+api.scaleApp(appProperties.appId, scaleUp)
 
 // More waiting
 sleep(5000)
 
 // Delete Mongo app
-app.destroyApp(appProperties.appId)
+api.destroyApp(appProperties.appId)
 
-// app.deployLoadBalancer('external')
-// app.deployLoadBalancer('internal')
+// api.deployLoadBalancer('external')
+// api.deployLoadBalancer('internal')
 
-app.checkHasLoadBalancer('external')
-app.checkHasLoadBalancer('internal')
+api.checkHasLoadBalancer('external')
+api.checkHasLoadBalancer('internal')

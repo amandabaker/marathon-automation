@@ -270,7 +270,6 @@ class Api {
         }
     }
 
-    // Read the configuration for a load balancer from json file
 
 
 

@@ -53,6 +53,18 @@ def appProperties = [
     ]
 ]
 
+def mlbPropertiesExt = [
+    type: 'external',
+    cpus: 0.5,
+    mem: 256
+]
+
+def mlbPropertiesInt = [
+    type: 'internal',
+    cpus: 1,
+    mem: 257
+]
+
 // Test scaling by scaling up to <scaleUp> instances
 def scaleUp = 5 
 def groupProperties = [
@@ -79,6 +91,11 @@ def groupProperties = [
         appHaproxyGroup: 'internal',
     ]
 ]
+
+
+//api.deployLoadBalancer ('external')
+api.deployLoadBalancer (mlbPropertiesExt)
+api.deployLoadBalancer (mlbPropertiesInt)
 
 // Deploy Mongo app set in properties above
 api.deployApp(appProperties)

@@ -6,7 +6,7 @@ import groovyx.net.http.*
 import static groovyx.net.http.Method.*
 import static groovyx.net.http.ContentType.TEXT
 import static groovyx.net.http.ContentType.JSON
-import groovy.json.JsonOutput
+import groovy.json.*
 
 class Api {
 
@@ -14,7 +14,7 @@ class Api {
     def http
     def autoDeployMLB   // MLB == Marathon Load Balancer
 
-    def init (appBaseUrl, appAutoDeployMLB) {
+    def init (String appBaseUrl, boolean appAutoDeployMLB) {
         baseUrl = appBaseUrl
         http = new HTTPBuilder (baseUrl)
         autoDeployMLB = appAutoDeployMLB
@@ -23,7 +23,7 @@ class Api {
     /* ----------------------------- App Stuff ----------------------------- */
 
     // Deploy an app according to the specified properties 'p' of the application 
-    def deployApp (p) {
+    def deployApp (Map p) {
         // 'p' is a map of the properties of the app
 
         //  It might be useful to check the properties 'p' passed in to ensure that
@@ -35,6 +35,7 @@ class Api {
             // Check if there is already a LB of specified type (external/internal)
             if (!checkHasLoadBalancer(p.appHaproxyGroup)) {
                 deployLoadBalancer(p.appHaproxyGroup)
+                sleep (5000)
             }
         }
 
@@ -57,7 +58,7 @@ class Api {
         }
     }
 
-    def deployAppBodyBuilder (p) {
+    def deployAppBodyBuilder (Map p) {
         // 'p' is a map of the properties of the app
 
         def postBody = [
@@ -127,7 +128,7 @@ class Api {
     }
 
     // Restart an app by the appId
-    def restartApp (appId) {
+    def restartApp (String appId) {
         // 'appId' is the properties.appId used to create the app
 
         try {
@@ -149,7 +150,7 @@ class Api {
     }
 
     // Destroy all instances of an app by appId
-    def destroyApp (appId) {
+    def destroyApp (String appId) {
         // 'appId' is the properties.appId used to create the app
 
         try {
@@ -170,7 +171,7 @@ class Api {
     }
 
     // Scale an app with appId to numInstances
-    def scaleApp (appId, numInstances) {
+    def scaleApp (String appId, int numInstances) {
         // 'appId' is the properties.appId used to create the app
         // 'numInstances' is the number of instances to which the app will be scaled
         
@@ -202,7 +203,7 @@ class Api {
     /* ------------------- Marathon Load Balancer Stuff -------------------- */
 
     // Before automatically creating a load balancer, check to see if one exists
-    def checkHasLoadBalancer (type) {
+    def checkHasLoadBalancer (String type) {
         // 'type' is either 'internal' or 'external'
         // get all applications running
         // search for load balancer
@@ -233,24 +234,23 @@ class Api {
     }
 
     // If we need a load balancer, deploy it with a specified type
-    def deployLoadBalancer (type) {
-        // 'type' is either 'internal' or 'external' 
-            //def deployApp (p) {
+    def deployLoadBalancer (p) {
         // 'p' is a map of the properties of the app
 
-        //  It might be useful to check the properties 'p' passed in to ensure that
-        //    the data is valid. Maybe warn if p does not contain:
-        //    cpu, mem, container.docker.image, constraints
-
-        def postBody
-
-        if (type == 'external') {
+        def postBody 
+        def jsonSlurper = new JsonSlurper()
+        
+        if (p?.type == 'external') {
             postBody = new File('json/marathon-lb-external.json').text
-
         }
         else {
             postBody = new File('json/marathon-lb-internal.json').text
         }
+        
+        postBody = jsonSlurper.parseText(postBody)
+
+        if (p?.cpus)    postBody['cpus'] = p.cpus
+        if (p?.mem)     postBody['mem'] = p.mem
 
         try {
             http.request (POST, JSON) { req ->
@@ -270,8 +270,6 @@ class Api {
         }
     }
 
-    // Read the configuration for a load balancer from json file
-    def deployLoadBalancerBodyBuilder (p) {}
 
 
 
